@@ -44,14 +44,36 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
     var selectedTag = 1
     var windowA = true
     
+    var keyboardButtons: [UIButton] = []
+    
+    @IBOutlet weak var counterButtonHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var keyboardViewHeightConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var keyboardHeightConstraint: NSLayoutConstraint!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         //backgroundImageView.hidden = true
+        
+        keyboardButtons = [zeroButton, oneButton, twoButton, threeButton, fourButton, fiveButton, sixButton, sevenButton, eightButton, nineButton, minusButton, plusButton]
+        
         if let game = game, players = game.players?.allObjects as? [Player] {
             self.players = players.sort({$0.name < $1.name})
         }
         
+        if UIScreen.mainScreen().nativeBounds.height == 960 {
+            for button in keyboardButtons {
+                button.layer.cornerRadius = 10
+            }
+            keyboardViewHeightConstraint.constant = 235
+            keyboardHeightConstraint.constant = 170
+            counterButtonHeightConstraint.constant = 180
+        }
+        
+        if UIScreen.mainScreen().nativeBounds.height == 1136 {
+            counterButtonHeightConstraint.constant = 220
+        }
         
         AppearanceController.sharedController.backgroundUpdateDelgate = self
         AppearanceController.sharedController.customKeyboardThemeDelegate = self
