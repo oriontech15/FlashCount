@@ -8,10 +8,12 @@
 
 import UIKit
 
-class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate, UpdateCustomKeyboardThemeDelegate {
+class ScoreKeeperViewController: UIViewController, //UpdateBackgroundImageDelegate, 
+UpdateCustomKeyboardThemeDelegate {
     
     @IBOutlet weak var backgroundImageView: UIImageView!
-    @IBOutlet weak var toggleThemeButton: UIButton!
+    @IBOutlet weak var nextPlayerButton: UIButton!
+    @IBOutlet weak var previousPlayerButton: UIButton!
     @IBOutlet weak var keyboardButton: UIButton!
     @IBOutlet weak var playerScoreLabel: UILabel!
     @IBOutlet weak var oneHundredToggleButton: UIButton!
@@ -20,6 +22,7 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
     @IBOutlet weak var keyboardView: UIView!
     @IBOutlet weak var plusMinusStackView: UIStackView!
     @IBOutlet weak var numberToUpdateWithLabel: UILabel!
+    @IBOutlet weak var deleteNumberButton: UIButton!
     @IBOutlet weak var plusButton: UIButton!
     @IBOutlet weak var minusButton: UIButton!
     @IBOutlet weak var zeroButton: UIButton!
@@ -33,18 +36,26 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
     @IBOutlet weak var eightButton: UIButton!
     @IBOutlet weak var nineButton: UIButton!
     @IBOutlet weak var seperatorViewKeyboard: UIView!
+    @IBOutlet weak var collectionView: UICollectionView!
     
     var numberString: String = ""
     var number: Int = 0
     var isInMiddleOfNumber: Bool = false
     var players: [Player] = []
     var game: Game?
+    var player: Player?
     var currentIndex = 0
     var scoreIncrement = 1
     var selectedTag = 1
     var windowA = true
+    var indexToStartFrom: Int?
+    var indexPathForCell: NSIndexPath = NSIndexPath()
     
     var keyboardButtons: [UIButton] = []
+    
+    var cellSize: CGSize = CGSizeZero
+    
+    var firstLoad: Bool = false
     
     @IBOutlet weak var counterButtonHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var keyboardViewHeightConstraint: NSLayoutConstraint!
@@ -54,9 +65,8 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //backgroundImageView.hidden = true
-        
         keyboardButtons = [zeroButton, oneButton, twoButton, threeButton, fourButton, fiveButton, sixButton, sevenButton, eightButton, nineButton, minusButton, plusButton]
+        
         
         if let game = game, players = game.players?.allObjects as? [Player] {
             self.players = players.sort({$0.name < $1.name})
@@ -75,10 +85,24 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
             counterButtonHeightConstraint.constant = 220
         }
         
-        AppearanceController.sharedController.backgroundUpdateDelgate = self
         AppearanceController.sharedController.customKeyboardThemeDelegate = self
         AppearanceController.sharedController.loadTheme()
         updateUIForScoreIncrementButtons(selectedTag)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.view.layoutSubviews()
+        self.view.layoutIfNeeded()
+        if let indexToStartFrom = indexToStartFrom {
+            let indexPath = NSIndexPath(forItem: indexToStartFrom, inSection: 0)
+            if !firstLoad {
+                collectionView.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+                self.indexPathForCell = indexPath
+                self.currentIndex = indexPath.item
+                firstLoad = true
+            }
+        }
     }
     
     override func preferredStatusBarStyle() -> UIStatusBarStyle {
@@ -90,12 +114,10 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
             AppearanceController.sharedController.theme = .Red
             AppearanceController.sharedController.toggleTheme()
             updateUIForScoreIncrementButtons(selectedTag)
-            toggleThemeButton.setTitle("Blue", forState: .Normal)
         } else {
             AppearanceController.sharedController.theme = .Blue
             AppearanceController.sharedController.toggleTheme()
             updateUIForScoreIncrementButtons(selectedTag)
-            toggleThemeButton.setTitle("Red", forState: .Normal)
         }
     }
     
@@ -120,6 +142,10 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
             self.keyboardButton.setTitle("- Counter +", forState: .Normal)
             self.windowA = true
         }
+    }
+    
+    @IBAction func deleteNumberButtonTapped(sender: UIButton) {
+        deleteNumber()
     }
     
     @IBAction func keyboardButtonsTapped(sender: UIButton) {
@@ -201,6 +227,15 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
         }
     }
     
+    func deleteNumber() {
+        self.numberString = String(self.numberString.characters.dropLast())
+        if numberString == "" {
+            numberToUpdateWithLabel.text = "0"
+        } else {
+            numberToUpdateWithLabel.text = self.numberString
+        }
+    }
+    
     func updateNumber(number: String, plus: Bool) {
         if isInMiddleOfNumber {
             self.numberString = self.numberString.stringByAppendingString(number)
@@ -234,7 +269,8 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func updateCustomKeyboardTheme(textColor: UIColor, actionImage: UIImage) {
+    func updateCustomKeyboardTheme(textColor: UIColor, actionImage: UIImage, backImage: UIImage, nextPlayerImage: UIImage, previousPlayerImage: UIImage) {
+        self.deleteNumberButton.setImage(backImage, forState: .Normal)
         self.zeroButton.setTitleColor(textColor, forState: .Normal)
         self.oneButton.setTitleColor(textColor, forState: .Normal)
         self.twoButton.setTitleColor(textColor, forState: .Normal)
@@ -248,10 +284,6 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
         self.minusButton.setBackgroundImage(actionImage, forState: .Normal)
         self.plusButton.setBackgroundImage(actionImage, forState: .Normal)
         self.seperatorViewKeyboard.backgroundColor = textColor
-    }
-    
-    func updateBackgroundImage(backgroundImage: UIImage) {
-        self.backgroundImageView.image = backgroundImage
     }
     
     func toggleScoreIncrementWithButtonTag(sender: UIButton) {
@@ -339,9 +371,37 @@ class ScoreKeeperViewController: UIViewController, UpdateBackgroundImageDelegate
             GameController.sharedController.save()
         }
     }
+    
+    @IBAction func swipeLeft(sender: AnyObject) {
+        if indexPathForCell.item == (game?.players?.count)! - 1 {
+            print("You Are at the last player")
+        } else {
+            let item = indexPathForCell.item
+            let newItem = item + 1
+            let newIndexPath = NSIndexPath(forItem: newItem, inSection: 0)
+            
+            self.collectionView.scrollToItemAtIndexPath(newIndexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+            self.currentIndex = newIndexPath.item
+        }
+
+    }
+    
+    @IBAction func swipeRight(sender: AnyObject) {
+        if  indexPathForCell.item == 0 {
+            print("You Are at the first player")
+        } else {
+            let item = indexPathForCell.item
+            let newItem = item - 1
+            let newIndexPath = NSIndexPath(forItem: newItem, inSection: 0)
+            
+            self.collectionView.scrollToItemAtIndexPath(newIndexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+            self.currentIndex = newIndexPath.item
+        }
+    }
+    
 }
 
-extension ScoreKeeperViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+extension ScoreKeeperViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.players.count
@@ -351,7 +411,8 @@ extension ScoreKeeperViewController: UICollectionViewDataSource, UICollectionVie
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("playerNameCell", forIndexPath: indexPath) as? PlayerCollectionViewCell
         
-        currentIndex = indexPath.item
+        self.indexPathForCell = indexPath
+        self.currentIndex = indexPath.item
         let player = players[indexPath.item]
         cell?.updateWith(player.name)
         if let score = player.score {
@@ -362,7 +423,20 @@ extension ScoreKeeperViewController: UICollectionViewDataSource, UICollectionVie
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        return CGSizeMake(UIScreen.mainScreen().bounds.width - 40, collectionView.frame.height)
+        self.cellSize = CGSizeMake(collectionView.frame.width, collectionView.frame.height)
+        return cellSize
+    }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+    }
+    
+    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        let centerPoint = CGPointMake(self.collectionView.center.x + self.collectionView.contentOffset.x, self.collectionView.center.y + self.collectionView.contentOffset.y)
+        if let indexPath = self.collectionView.indexPathForItemAtPoint(centerPoint) {
+            self.collectionView.scrollToItemAtIndexPath(indexPath, atScrollPosition: .CenteredHorizontally, animated: true)
+            self.indexPathForCell = indexPath
+            self.currentIndex = indexPathForCell.item
+        }
     }
 }
 

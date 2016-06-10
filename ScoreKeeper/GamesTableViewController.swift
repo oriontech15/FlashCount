@@ -8,132 +8,222 @@
 
 import UIKit
 
-class GamesTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate {
+class GamesTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, CreateGameDelegate, DismissBlurDelegate {
+    
+    @IBOutlet weak var headerView: UIView!
+    @IBOutlet weak var bucketBarButton: UIBarButtonItem!
+    @IBOutlet weak var addGameBarButton: UIBarButtonItem!
+    
+    var blurEffectView = UIVisualEffectView()
 
     var game: Game?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        self.tableView.contentInset = UIEdgeInsets(top: -36, left: 0, bottom: 0, right: 0)
+        
+        //        self.tableView.contentInset = UIEdgeInsets(top: 0, left: -20, bottom: 0, right: 40)
     }
     
     override func viewWillAppear(animated: Bool)
     {
-        AppearanceController.sharedController.loadTheme()
+        self.tableView.reloadData()
         AppearanceController.sharedController.navigationBarAppearanceDelegate = self
+        if AppearanceController.sharedController.theme == .Blue {
+            bucketBarButton.image = UIImage(named: "BluePaintBucket")?.imageWithRenderingMode(.AlwaysOriginal)
+        } else {
+            bucketBarButton.image = UIImage(named: "RedPaintBucket")?.imageWithRenderingMode(.AlwaysOriginal)
+        }
+        AppearanceController.sharedController.loadTheme()
     }
     
     @IBAction func changeThemeButtonTapped() {
         if AppearanceController.sharedController.theme == .Blue {
             AppearanceController.sharedController.theme = .Red
+            bucketBarButton.image = UIImage(named: "RedPaintBucket")?.imageWithRenderingMode(.AlwaysOriginal)
             AppearanceController.sharedController.toggleTheme()
         } else {
             AppearanceController.sharedController.theme = .Blue
+            bucketBarButton.image = UIImage(named: "BluePaintBucket")?.imageWithRenderingMode(.AlwaysOriginal)
             AppearanceController.sharedController.toggleTheme()
         }
         AppearanceController.sharedController.loadTheme()
     }
     
-    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle) {
+    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle, editScoresImage: UIImage, trophyImage: UIImage) {
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName : tintColor]
         self.navigationController?.navigationBar.barTintColor = color
+        self.navigationController?.navigationBar.backgroundColor = .clearColor()
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), forBarMetrics: .Default)
         self.navigationController?.navigationBar.barStyle = barStyle
+        self.navigationController?.navigationBar.translucent = false
+        self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.tintColor = tintColor
+        self.view.backgroundColor = .themeDarkestGray()
+        if AppearanceController.sharedController.theme == .Blue {
+            self.headerView.backgroundColor = .themeBlue()
+        } else {
+            self.headerView.backgroundColor = .themeRedLight()
+        }
+        self.tableView.reloadData()
     }
     
     @IBAction func createGameButtonTapped() {
-        let alert = UIAlertController(title: "Create a Game", message: "Enter the name for your game", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textfield) in
-            textfield.placeholder = "name"
-            textfield.keyboardType = .Default
-            textfield.keyboardAppearance = .Light
-            textfield.autocapitalizationType = .Words
-        }
+        presentCreateGameAlert()
+    }
+    
+    func createGameCellButtonTapped() {
+        presentCreateGameAlert()
+    }
+    
+    func presentCreateGameAlert() {
         
-        let create = UIAlertAction(title: "Create", style: .Default) { (_) in
-            if let text = alert.textFields?[0].text {
-                GameController.sharedController.createGame(text)
-                self.tableView.reloadData()
+        if let view = UIView.loadFromNibNamed("CreateGameView") as? CreateGameView
+        {
+            let blurEffect = UIBlurEffect(style: .Light)
+            blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = (self.navigationController?.view.bounds)!
+            
+            view.alpha = 0.0
+            let frame = CGRectMake(30, self.view.center.x - 150, UIScreen.mainScreen().bounds.width - 60, 350)
+            view.frame = frame
+            view.delegate = self
+            view.defaultFrame = frame
+            view.layer.cornerRadius = 10
+//            view.layer.borderColor = UIColor.themeBlue().CGColor
+//            view.layer.borderWidth = 0.4
+//            view.layer.shadowColor = UIColor.themeBlue().CGColor
+//            view.layer.shadowOpacity = 1.0
+//            view.layer.shadowOffset = CGSizeZero
+//            view.layer.shadowRadius = 10
+            self.navigationController?.view.addSubview(blurEffectView)
+            self.navigationController?.view.addSubview(view)
+            
+            UIView.animateWithDuration(0.6, animations: {
+                view.alpha = 1.0
+            })
+        }
+    }
+    
+    func dismissBlur(cancelTapped: Bool)
+    {
+        UIView.animateWithDuration(0.3, animations: {
+            self.blurEffectView.alpha = 0.0
+        }) { (complete) in
+            if complete
+            {
+                self.blurEffectView.removeFromSuperview()
+                if !cancelTapped
+                {
+                    self.tableView.reloadData()
+                }
             }
         }
-        
-        let cancel = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
-        
-        alert.addAction(create)
-        alert.addAction(cancel)
-        
-        self.presentViewController(alert, animated: true, completion: nil)
     }
-
+    
     // MARK: - Table view data source
-
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return GameController.sharedController.games.count
+    
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        if GameController.sharedController.games.count > 0 {
+            return GameController.sharedController.games.count
+        } else {
+            return 1
+        }
     }
-
+    
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("gamesCell", forIndexPath: indexPath)
         
-        let game = GameController.sharedController.games[indexPath.row]
-        cell.textLabel?.text = game.name
-        cell.textLabel?.textAlignment = .Center
+        if GameController.sharedController.games.count > 0 {
+            let cell = tableView.dequeueReusableCellWithIdentifier("gamesCell", forIndexPath: indexPath) as? GameTableViewCell
+            let game = GameController.sharedController.games[indexPath.section]
+            if AppearanceController.sharedController.theme == .Blue {
+                cell?.backgroundColor = .themeBlue()
+                cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, textColor: .themeDarkestGray())
+                //cell?.contentView.layer.cornerRadius = 27.4
+            } else {
+                cell?.backgroundColor = .themeRedLight()
+                cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, textColor: .whiteColor())
+                //cell?.contentView.layer.cornerRadius = 27.4
+            }
+            
+            return cell ?? UITableViewCell()
+            
+        } else {
+            let cell = tableView.dequeueReusableCellWithIdentifier("noGamesCell", forIndexPath: indexPath) as? NoDataTableViewCell
+            cell?.delegate = self
+            cell?.noDataLabel.text = "No games"
+            cell?.noDataLabel.textColor = .whiteColor()
+            if AppearanceController.sharedController.theme == .Blue {
+                cell?.createGameButton.backgroundColor = .themeBlue()
+            } else {
+                cell?.createGameButton.backgroundColor = .themeRedLight()
+            }
         
-        return cell
+            return cell ?? UITableViewCell()
+        }
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.game = GameController.sharedController.games[indexPath.row]
-        self.performSegueWithIdentifier("toPlayerView", sender: nil)
+        if GameController.sharedController.games.count > 0 {
+            self.game = GameController.sharedController.games[indexPath.section]
+            self.performSegueWithIdentifier("toPlayerView", sender: nil)
+        }
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 55
+        if GameController.sharedController.games.count > 0 {
+            return 55
+        } else {
+            return 150
+        }
     }
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
+    
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+            if indexPath.row == 0 {
+                let game = GameController.sharedController.games[indexPath.section]
+                GameController.sharedController.deleteGame(game)
+                tableView.reloadData()
+            } else {
+                let game = GameController.sharedController.games[indexPath.section]
+                GameController.sharedController.deleteGame(game)
+                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            }
+        }
     }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
     
-
+    override func tableView(tableView: UITableView, shouldIndentWhileEditingRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return false
+    }
+    
+    override func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = UIView(frame: CGRectMake(0, 0, self.view.frame.size.width, 10))
+        view.backgroundColor = .clearColor()
+        return view
+    }
+    
+    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 10
+    }
+    
+    override func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view = UIView(frame: CGRectMake(0, 0, self.view.frame.size.width, 0))
+        view.backgroundColor = .clearColor()
+        return view
+    }
+    
+    override func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0
+    }
+    
     // MARK: - Navigation
-
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
         
         if segue.identifier == "toPlayerView" {
             if let playerVC = segue.destinationViewController as? PlayersTableViewController {
@@ -141,5 +231,5 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
             }
         }
     }
-
+    
 }

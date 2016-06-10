@@ -12,12 +12,14 @@ import CoreData
 
 class Game: NSManagedObject {
     
-    convenience init?(name:String, context:NSManagedObjectContext = Stack.sharedStack.managedObjectContext) {
+    convenience init?(name:String, scoreType: NSNumber = 0, date: NSDate = NSDate(), context:NSManagedObjectContext = Stack.sharedStack.managedObjectContext) {
         
         guard let entity = NSEntityDescription.entityForName("Game", inManagedObjectContext: context) else {return nil}
         
         self.init(entity: entity, insertIntoManagedObjectContext:context)
         
         self.name = name
+        self.scoreType = scoreType
+        self.date = date
     }
 }

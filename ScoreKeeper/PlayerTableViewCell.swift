@@ -18,10 +18,12 @@ class PlayerTableViewCell: UITableViewCell {
         // Initialization code
     }
 
-    func updateWith(player: Player) {
+    func updateWith(player: Player, textColor: UIColor) {
         if let score = player.score {
             self.playerNameLabel.text = player.name
+            self.playerNameLabel.textColor = textColor
             self.playerScoreLabel.text = "\(score)"
+            self.playerScoreLabel.textColor = textColor
         }
     }
 }

@@ -8,34 +8,35 @@
 
 import UIKit
 
-class CustomNavBarToggleThemeButton: UIButton, UpdateCustomNavBarToggleThemeButtonUIDelegate {
-
-    var customBackgroundColor: UIColor = .whiteColor() {
-        didSet {
-            setupView()
-        }
-    }
-    
-    var customTextcolor: UIColor = .whiteColor() {
-        didSet {
-            setupView()
-        }
-    }
+@IBDesignable
+class CustomNavBarToggleThemeButton: UIButton /* UpdateCustomNavBarToggleThemeButtonUIDelegate */ {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        AppearanceController.sharedController.customNavBarToggleThemeButtonDelegate = self
+        //AppearanceController.sharedController.customNavBarToggleThemeButtonDelegate = self
+        setupView()
+    }
+    
+    override func prepareForInterfaceBuilder() {
+        super.prepareForInterfaceBuilder()
         setupView()
     }
     
     func setupView() {
-        self.backgroundColor = customBackgroundColor
-        self.setTitleColor(customTextcolor, forState: .Normal)
-        self.layer.cornerRadius = 10
+        
+        if AppearanceController.sharedController.theme == .Blue {
+            self.backgroundColor = .themeBlue()
+            self.setTitleColor(.themeDarkestGray(), forState: .Normal)
+        } else {
+            self.backgroundColor = .themeRedLight()
+            self.setTitleColor(.whiteColor(), forState: .Normal)
+        }
+        
+        self.layer.cornerRadius = self.frame.height / 2
     }
     
-    func updateCustomNavBarToggleThemeButton(backgroundColor: UIColor, textColor: UIColor) {
-        self.customBackgroundColor = backgroundColor
-        self.customTextcolor = textColor
-    }
+//    func updateCustomNavBarToggleThemeButton(backgroundColor: UIColor, textColor: UIColor) {
+//        self.customBackgroundColor = backgroundColor
+//        self.customTextcolor = textColor
+//    }
 }

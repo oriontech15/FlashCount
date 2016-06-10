@@ -2,7 +2,7 @@
 //  Game+CoreDataProperties.swift
 //  ScoreKeeper
 //
-//  Created by Justin Smith on 5/11/16.
+//  Created by Justin Smith on 6/2/16.
 //  Copyright © 2016 Justin Smith. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -15,6 +15,8 @@ import CoreData
 extension Game {
 
     @NSManaged var name: String
+    @NSManaged var date: NSDate
+    @NSManaged var scoreType: NSNumber
     @NSManaged var players: NSSet?
 
 }

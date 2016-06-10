@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().barTintColor = UIColor(red: 0.275, green: 0.890, blue: 1.000, alpha: 1.00)
         UINavigationBar.appearance().tintColor = UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00)
         
+        UINavigationBar.appearance()
         let titleDict: NSDictionary = [NSForegroundColorAttributeName: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00)]
         UINavigationBar.appearance().titleTextAttributes = titleDict as? [String : AnyObject]
         

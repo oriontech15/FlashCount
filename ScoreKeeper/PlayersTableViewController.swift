@@ -8,30 +8,37 @@
 
 import UIKit
 
-class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate {
+class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, AddPlayerDelegate, DismissBlurDelegate {
     
+    @IBOutlet weak var addPlayerButton: CustomNumberButton!
+    @IBOutlet weak var scoreButtonsStackView: UIStackView!
+    @IBOutlet weak var editScoresButton: UIButton!
     @IBOutlet weak var scoreViewButton: UIButton!
     @IBOutlet weak var gameTitleLabel: UILabel!
+    @IBOutlet weak var toolbarView: UIView!
+    @IBOutlet weak var toolbarSeperatorView: UIView!
+    
+    var isPlayersLabel: UILabel!
     
     var game: Game?
+    
+    var blurEffectView = UIVisualEffectView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-        if let game = self.game {
-            gameTitleLabel.text = game.name
-        }
+        isPlayersLabel = UILabel()
+        self.view.addSubview(isPlayersLabel)
+        isPlayersLabel.hidden = true
+        
         AppearanceController.sharedController.navigationBarAppearanceDelegate = self
         
         AppearanceController.sharedController.loadTheme()
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        
         toggleScoreViewButtonEnabled()
         self.tableView.reloadData()
         self.view.setNeedsDisplay()
@@ -40,83 +47,165 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
     func toggleScoreViewButtonEnabled() {
         if let game = self.game {
             if game.players!.count == 0 {
-                self.scoreViewButton.enabled = false
-                self.scoreViewButton.setTitleColor(.lightGrayColor(), forState: .Normal)
+                isPlayersLabel.hidden = false
+                self.view.bringSubviewToFront(isPlayersLabel)
+                isPlayersLabel.frame = CGRectMake(self.view.frame.origin.x + 20, self.view.frame.origin.y + 20, self.view.frame.size.width - 40, 50)
+                isPlayersLabel.textAlignment = .Center
+                isPlayersLabel.textColor = .whiteColor()
+                isPlayersLabel.text = "Currently no players"
+                self.scoreButtonsStackView.hidden = true
             } else {
-                self.scoreViewButton.enabled = true
-                if AppearanceController.sharedController.theme == .Blue {
-                    self.scoreViewButton.setTitleColor(UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00), forState: .Normal)
-                } else {
-                    self.scoreViewButton.setTitleColor(.whiteColor(), forState: .Normal)
-                }
-                
+                self.scoreButtonsStackView.hidden = false
+                isPlayersLabel.hidden = true
             }
         }
     }
     
-    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle) {
+    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle, editScoresImage: UIImage, trophyImage: UIImage) {
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName : tintColor]
-        self.scoreViewButton.backgroundColor = color
-        self.scoreViewButton.setTitleColor(tintColor, forState: .Normal)
-        self.scoreViewButton.layer.cornerRadius = self.scoreViewButton.frame.height / 2
         self.navigationController?.navigationBar.barTintColor = color
+        self.navigationController?.navigationBar.backgroundColor = .clearColor()
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), forBarMetrics: .Default)
         self.navigationController?.navigationBar.barStyle = barStyle
+        self.navigationController?.navigationBar.translucent = false
+        self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.tintColor = tintColor
+
+//        if AppearanceController.sharedController.theme == .Blue {
+//            //            let imageView = UIImageView(frame: CGRectMake(0, self.view.frame.origin.y - 45, self.view.frame.width, UIScreen.mainScreen().bounds.height))
+//            //            imageView.image = UIImage(named: "Background-Blue")
+//            
+//        } else {
+//            //            let imageView = UIImageView(frame: CGRectMake(0, -45, self.view.frame.width, UIScreen.mainScreen().bounds.height))
+//            //            imageView.image = UIImage(named: " Background-Red")
+//            
+//        }
+        
+        if AppearanceController.sharedController.theme == .Red {
+            let view = UIView(frame: CGRectMake(0, -45, self.view.frame.width, UIScreen.mainScreen().bounds.height))
+            view.backgroundColor = .themeDarkestGray()
+            tableView.backgroundView = view
+            if let game = self.game {
+                gameTitleLabel.text = game.name
+            }
+            self.addPlayerButton.setImage(UIImage(named: "Add Player - White"), forState: .Normal)
+            self.addPlayerButton.backgroundColor = .themeRedLight()
+            self.gameTitleLabel.textColor = .whiteColor()
+            self.toolbarView.backgroundColor = .themeDarkGray()
+            self.toolbarSeperatorView.backgroundColor = .themeRedLight()
+            self.addPlayerButton.setTitleColor(.whiteColor(), forState: .Normal)
+        } else {
+            let view = UIView(frame: CGRectMake(0, -45, self.view.frame.width, UIScreen.mainScreen().bounds.height))
+            view.backgroundColor = .themeDarkestGray()
+            tableView.backgroundView = view
+            if let game = self.game {
+                gameTitleLabel.text = game.name
+            }
+            self.addPlayerButton.setImage(UIImage(named: "ProfileBarButtonItem"), forState: .Normal)
+            self.addPlayerButton.backgroundColor = .themeBlue()
+            self.gameTitleLabel.textColor = .whiteColor()
+            self.toolbarView.backgroundColor = .themeDarkGray()
+            self.toolbarSeperatorView.backgroundColor = .themeBlue()
+            self.addPlayerButton.setTitleColor(.themeDarkestGray(), forState: .Normal)
+        }
+        
+        self.editScoresButton.setImage(editScoresImage, forState: .Normal)
+        self.scoreViewButton.setImage(trophyImage, forState: .Normal)
     }
     
     @IBAction func createGameButtonTapped() {
-        let alert = UIAlertController(title: "Create New Player", message: "Enter the name for the new player", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textfield) in
-            textfield.placeholder = "name"
-            textfield.keyboardType = .Default
-            textfield.keyboardAppearance = .Light
-            textfield.autocapitalizationType = .Words
-        }
+        presentNewPlayerView()
+    }
+    
+    func addPlayerButtonTapped() {
+        presentNewPlayerView()
+    }
+    
+    func presentNewPlayerView() {
         
-        let create = UIAlertAction(title: "Create", style: .Default) { (_) in
-            if let game = self.game, text = alert.textFields?[0].text {
-                GameController.sharedController.addPlayerToGame(text, game: game)
-                self.toggleScoreViewButtonEnabled()
-                self.tableView.reloadData()
+        if let view = UIView.loadFromNibNamed("AddPlayersView") as? AddPlayerView
+        {
+            let blurEffect = UIBlurEffect(style: .Light)
+            blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView.frame = (self.navigationController?.view.bounds)!
+            
+            view.alpha = 0.0
+            let frame = CGRectMake(30, self.view.center.x - 150, UIScreen.mainScreen().bounds.width - 60, 390)
+            view.frame = frame
+            view.delegate = self
+            view.game = self.game
+            view.defaultFrame = frame
+            view.layer.cornerRadius = 10
+            self.navigationController?.view.addSubview(blurEffectView)
+            self.navigationController?.view.addSubview(view)
+            
+            UIView.animateWithDuration(0.6, animations: {
+                view.alpha = 1.0
+            })
+        }
+    }
+    
+    func dismissBlur(cancelTapped: Bool)
+    {
+        UIView.animateWithDuration(0.3, animations: {
+            self.blurEffectView.alpha = 0.0
+        }) { (complete) in
+            if complete
+            {
+                self.blurEffectView.removeFromSuperview()
+                if !cancelTapped
+                {
+                    self.tableView.reloadData()
+                    self.toggleScoreViewButtonEnabled()
+                }
             }
         }
-        
-        let cancel = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
-        
-        alert.addAction(create)
-        alert.addAction(cancel)
-        
-        self.presentViewController(alert, animated: true, completion: nil)
     }
     
-    @IBAction func scoreViewButtonTapped(sender: AnyObject) {
+    @IBAction func scoreViewButtonTapped() {
+        self.performSegueWithIdentifier("toScoreView", sender: nil)
+    }
+    
+    @IBAction func editScoresButtonTapped(sender: AnyObject) {
         self.performSegueWithIdentifier("toScoringView", sender: nil)
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     // MARK: - Table view data source
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        if let players = game?.players?.allObjects as? [Player] {
-            return players.count
+        if game?.players?.allObjects.count > 0 {
+            if let players = game?.players?.allObjects as? [Player] {
+                return players.count
+            } else {
+                return 0
+            }
         } else {
             return 0
         }
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCellWithIdentifier("playerCell", forIndexPath: indexPath) as? PlayerTableViewCell {
-            if let players = game?.players?.allObjects as? [Player] {
-                let sortedPlayers = players.sort({ $0.name < $1.name })
-                let player = sortedPlayers[indexPath.row]
-                cell.updateWith(player)
-                
-                return cell
+        if game?.players?.allObjects.count > 0 {
+            if let cell = tableView.dequeueReusableCellWithIdentifier("playerCell", forIndexPath: indexPath) as? PlayerTableViewCell {
+                if let players = game?.players?.allObjects as? [Player] {
+                    let sortedPlayers = players.sort({ $0.name < $1.name })
+                    let player = sortedPlayers[indexPath.row]
+                    if AppearanceController.sharedController.theme == .Red {
+                        cell.updateWith(player, textColor: .whiteColor())
+                        let selectedView = UIView()
+                        selectedView.backgroundColor = .themeRedLight()
+                        cell.selectedBackgroundView = selectedView
+                    } else {
+                        cell.updateWith(player, textColor: .whiteColor())
+                        let selectedView = UIView()
+                        selectedView.backgroundColor = .themeBlue()
+                        cell.selectedBackgroundView = selectedView
+                    }
+                    
+                    return cell
+                } else {
+                    return UITableViewCell()
+                }
             } else {
                 return UITableViewCell()
             }
@@ -125,52 +214,72 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
         }
     }
     
-    /*
-     // Override to support conditional editing of the table view.
-     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-     // Return false if you do not want the specified item to be editable.
-     return true
-     }
-     */
-    
-    // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
-            if let game = self.game, players = game.players?.allObjects as? [Player] {
-                let sortedPlayers = players.sort({$0.name < $1.name})
-                let player = sortedPlayers[indexPath.row]
-                tableView.beginUpdates()
-                GameController.sharedController.deletePlayerFromGame(player)
-                toggleScoreViewButtonEnabled()
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-                tableView.endUpdates()
+            if indexPath.row != 0 {
+                if let game = self.game, players = game.players?.allObjects as? [Player] {
+                    let sortedPlayers = players.sort({$0.name < $1.name})
+                    let player = sortedPlayers[indexPath.row]
+                    tableView.beginUpdates()
+                    GameController.sharedController.deletePlayerFromGame(player)
+                    toggleScoreViewButtonEnabled()
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                    tableView.endUpdates()
+                }
+            } else {
+                if let game = self.game, players = game.players?.allObjects as? [Player] {
+                    let sortedPlayers = players.sort({$0.name < $1.name})
+                    let player = sortedPlayers[indexPath.row]
+                    GameController.sharedController.deletePlayerFromGame(player)
+                    toggleScoreViewButtonEnabled()
+                    tableView.reloadData()
+                }
             }
         }
     }
     
-    /*
-     // Override to support rearranging the table view.
-     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-     
-     }
-     */
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        self.performSegueWithIdentifier("toScoringView", sender: nil)
+    }
     
-    /*
-     // Override to support conditional rearranging of the table view.
-     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-     // Return false if you do not want the item to be re-orderable.
-     return true
-     }
-     */
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if section == 0 {
+            return "Players"
+        } else {
+            return ""
+        }
+    }
     
-    // MARK: - Navigation
+    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 3.0
+    }
     
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = UIView(frame: CGRectMake(0, 0, self.view.frame.width, 3))
+        let label = UILabel(frame: CGRectMake(30, 0, self.view.frame.width, 30))
+        label.text = "This games players"
+        label.font = UIFont(name: "HelveticaNeue-Medium", size: 17)
+        if AppearanceController.sharedController.theme == .Red {
+            view.backgroundColor = .themeRedLight()
+            label.textColor = .whiteColor()
+        } else {
+            view.backgroundColor = .themeBlue()
+            label.textColor = .whiteColor()
+        }
+        return view
+    }
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
         if segue.identifier == "toScoringView" {
-            if let scoreVC = segue.destinationViewController as? ScoreKeeperViewController {
+            if let editScoreVC = segue.destinationViewController as? ScoreKeeperViewController {
+                if let indexPath = tableView.indexPathForSelectedRow {
+                    editScoreVC.indexToStartFrom = indexPath.row
+                }
+                editScoreVC.game = self.game
+            }
+        } else if segue.identifier == "toScoreView" {
+            if let scoreVC = segue.destinationViewController as? ScoreViewController {
                 scoreVC.game = self.game
             }
         }

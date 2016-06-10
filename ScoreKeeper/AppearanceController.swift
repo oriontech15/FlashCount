@@ -38,15 +38,23 @@ protocol UpdateCustomNavBarToggleKeyboardButtonUIDelegate {
 }
 
 protocol UpdateCustomKeyboardThemeDelegate {
-    func updateCustomKeyboardTheme(textColor: UIColor, actionImage: UIImage)
+    func updateCustomKeyboardTheme(textColor: UIColor, actionImage: UIImage, backImage: UIImage, nextPlayerImage: UIImage, previousPlayerImage: UIImage)
 }
 
 protocol UpdateNavigationBarAppearanceDelegate {
-    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle)
+    func updateNagivationBarAppearanceToThemeColor(color: UIColor, tintColor: UIColor, barStyle: UIBarStyle, editScoresImage: UIImage, trophyImage: UIImage)
 }
 
 protocol ChangeUIDelegate {
     func changeAppearance()
+}
+
+protocol UpdateCreateGameButtonDelegate {
+    func updateCreateGameButton(color: UIColor, textColor: UIColor)
+}
+
+protocol UpdateAddPlayerButtonDelegate {
+    func updateAddPlayerButton(color: UIColor, textColor: UIColor)
 }
 
 enum Theme {
@@ -57,6 +65,9 @@ enum Theme {
 class AppearanceController {
     
     var theme = Theme.Blue
+    
+    var playerCurrentIndex: Int = 0
+    var playerFontSize: CGFloat = 18.0
     
     static let sharedController = AppearanceController()
     
@@ -70,56 +81,114 @@ class AppearanceController {
     var customNavBarToggleKeyboardButtonDelegate: UpdateCustomNavBarToggleKeyboardButtonUIDelegate?
     var customKeyboardThemeDelegate: UpdateCustomKeyboardThemeDelegate?
     var changeUIDelegate: ChangeUIDelegate?
+    var updateCreateGameButtonDelegate: UpdateCreateGameButtonDelegate?
+    var updateAddPlayerButtonDelegate: UpdateAddPlayerButtonDelegate?
 
     func toggleTheme() {
         if theme == .Blue {
             
-            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(UIColor(red: 0.275, green: 0.890, blue: 1.000, alpha: 1.00), tintColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00), barStyle: .Default)
-            backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
-            plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Filled")!)
-            minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Filled")!)
-            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "BlueNumberImage")!), actionImage: UIImage(named: "BlueActionButton")!)
-            labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "BlueLabelImage")!))
-            customNavBarToggleThemeButtonDelegate?.updateCustomNavBarToggleThemeButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00))
-            customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00))
-            customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00))
+            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(.themeDarkestGray(), tintColor: .whiteColor(), barStyle: .Black, editScoresImage: UIImage(named: "Edit Scores - Blue")!, trophyImage: UIImage(named: "Trophy - Blue")!)
             
+            backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
+            
+            plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Filled")!)
+            
+            minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Filled")!)
+            
+            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "BlueNumberImage")!),
+                                                                   actionImage: UIImage(named: "BlueActionButton")!,
+                                                                   backImage: UIImage(named: "BlueBackSpace")!,
+                                                                   nextPlayerImage: UIImage(named: "BlueNextPlayer")!,
+                                                                   previousPlayerImage: UIImage(named: "BluePreviousPlayer")!)
+            
+            labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "BlueLabelImage")!))
+            
+            customNavBarToggleThemeButtonDelegate?.updateCustomNavBarToggleThemeButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: .themeDarkestGray())
+            
+            customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: .themeDarkestGray())
+            
+            customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "BlueActionButton")!), textColor: .themeDarkestGray())
+            
+            updateCreateGameButtonDelegate?.updateCreateGameButton(.themeBlue(), textColor: .themeDarkestGray())
+            
+            updateAddPlayerButtonDelegate?.updateAddPlayerButton(.themeBlue(), textColor: .themeDarkestGray())
         } else {
             
-            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(UIColor(red: 1.000, green: 0.227, blue: 0.318, alpha: 1.00), tintColor: .whiteColor(), barStyle: .BlackTranslucent)
+            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(.themeDarkestGray(), tintColor: .whiteColor(), barStyle: .Black, editScoresImage: UIImage(named: "Edit Scores - Red")!, trophyImage: UIImage(named: "Trophy - Red")!)
+            
             backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
+            
             plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Red")!)
+            
             minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Red")!)
-            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "RedNumberImage")!), actionImage: UIImage(named: "RedActionButton")!)
+            
+            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "RedNumberImage")!),
+                                                                   actionImage: UIImage(named: "RedActionButton")!,
+                                                                   backImage: UIImage(named: "RedBackSpace")!,
+                                                                   nextPlayerImage: UIImage(named: "RedNextPlayer")!,
+                                                                   previousPlayerImage: UIImage(named: "RedPreviousPlayer")!)
+            
             labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "RedLabelImage")!))
+            
             customNavBarToggleThemeButtonDelegate?.updateCustomNavBarToggleThemeButton(UIColor(patternImage: UIImage(named: "RedActionButton")!), textColor: .whiteColor())
+            
             customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "RedActionButton")!), textColor: .whiteColor())
+            
             customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "RedActionButton")!), textColor: .whiteColor())
+            
+            updateCreateGameButtonDelegate?.updateCreateGameButton(.themeRed(), textColor: .whiteColor())
+            
+            updateAddPlayerButtonDelegate?.updateAddPlayerButton(.themeRed(), textColor: .whiteColor())
         }
     }
     
     func loadTheme() {
         if theme == .Blue {
             
-            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(UIColor(red: 0.275, green: 0.890, blue: 1.000, alpha: 1.00), tintColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00), barStyle: .Default)
-            backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
-            plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Filled")!)
-            minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Filled")!)
-            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "BlueNumberImage")!), actionImage: UIImage(named: "BlueActionButton")!)
-            labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "BlueLabelImage")!))
-            customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "BlueNavButtonImage")!), textColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00))
-            customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "BlueNavButtonImage")!), textColor: UIColor(red: 0.184, green: 0.184, blue: 0.184, alpha: 1.00))
+            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(.themeDarkestGray(), tintColor: .whiteColor(), barStyle: .Black, editScoresImage: UIImage(named: "Edit Scores - Blue")!, trophyImage: UIImage(named: "Trophy - Blue")!)
             
+            backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
+            
+            plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Filled")!)
+            
+            minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Filled")!)
+            
+            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "BlueNumberImage")!), actionImage: UIImage(named: "BlueActionButton")!, backImage: UIImage(named: "BlueBackSpace")!, nextPlayerImage: UIImage(named: "BlueNextPlayer")!, previousPlayerImage: UIImage(named: "BluePreviousPlayer")!)
+            
+            labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "BlueLabelImage")!))
+            
+            customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "BlueNavButtonImage")!), textColor: .themeDarkestGray())
+            
+            customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "BlueNavButtonImage")!), textColor: .themeDarkestGray())
+            
+            updateCreateGameButtonDelegate?.updateCreateGameButton(.themeBlue(), textColor: .themeDarkestGray())
+            
+            updateAddPlayerButtonDelegate?.updateAddPlayerButton(.themeBlue(), textColor: .themeDarkestGray())
         } else {
             
-            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(UIColor(red: 1.000, green: 0.227, blue: 0.318, alpha: 1.00), tintColor: .whiteColor(), barStyle: .BlackTranslucent)
+            navigationBarAppearanceDelegate?.updateNagivationBarAppearanceToThemeColor(.themeDarkestGray(), tintColor: .whiteColor(), barStyle: .Black, editScoresImage: UIImage(named: "Edit Scores - Red")!, trophyImage: UIImage(named: "Trophy - Red")!)
+            
             backgroundUpdateDelgate?.updateBackgroundImage(UIImage(named: "ScoreKeeperBackgroundNoColorBlur")!)
+            
             plusButtonUIDelegate?.updatePlusButtonUI(UIImage(named: "Plus Button Red")!)
+            
             minusButtonUIDelegate?.updateMinusButtonUI(UIImage(named: "Minus Button Red")!)
-            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "RedNumberImage")!), actionImage: UIImage(named: "RedActionButton")!)
+            
+            customKeyboardThemeDelegate?.updateCustomKeyboardTheme(UIColor(patternImage: UIImage(named: "RedNumberImage")!),
+                                                                   actionImage: UIImage(named: "RedActionButton")!,
+                                                                   backImage: UIImage(named: "RedBackSpace")!,
+                                                                   nextPlayerImage: UIImage(named: "RedNextPlayer")!,
+                                                                   previousPlayerImage: UIImage(named: "RedPreviousPlayer")!)
+            
             labelUIDelegate?.updateLabelUI(UIColor(patternImage: UIImage(named: "RedLabelImage")!))
+            
             customNavBarEditPlayersButtonDelegate?.updateCustomNavBarEditPlayersButton(UIColor(patternImage: UIImage(named: "RedNavButtonImage")!), textColor: .whiteColor())
+            
             customNavBarToggleKeyboardButtonDelegate?.updateCustomNavBarToggleKeyboardButton(UIColor(patternImage: UIImage(named: "RedNavButtonImage")!), textColor: .whiteColor())
+            
+            updateCreateGameButtonDelegate?.updateCreateGameButton(.themeRed(), textColor: .whiteColor())
+            
+            updateAddPlayerButtonDelegate?.updateAddPlayerButton(.themeRed(), textColor: .whiteColor())
         }
     }
 }
