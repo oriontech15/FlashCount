@@ -36,6 +36,8 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
         self.backgroundColor = .themeDarkGray()
         
         self.newPlayerTableView.registerNib(UINib(nibName: "NewPlayerCell", bundle: nil), forCellReuseIdentifier: "newPlayerCell")
+        
+        self.newPlayerTableView.registerNib(UINib(nibName: "PlayerNameCell", bundle: nil), forCellReuseIdentifier: "playerNameCell")
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         self.addGestureRecognizer(tap)
@@ -70,22 +72,20 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
     @IBAction func addPlayerButtonTapped(sender: AnyObject) {
         
         numberOfRows = numberOfRows + 1
-        let newIndexPath = NSIndexPath(forItem: numberOfRows - 1, inSection: 0)
+        let newIndexPath = NSIndexPath(forItem: numberOfRows - 1, inSection: 1)
         self.newPlayerTableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
 
-        if numberOfRows >= 5 {
-            let indexPath = NSIndexPath(forRow: numberOfRows - 1, inSection: 0)
-            self.newPlayerTableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+        let indexPath = NSIndexPath(forRow: numberOfRows - 1, inSection: 1)
+        self.newPlayerTableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
 //            let offset = CGPointMake(0, newPlayerTableView.contentSize.height - newPlayerTableView.frame.size.height + 2)
 //            self.newPlayerTableView.setContentOffset(offset, animated: true)
-        }
     }
     
     func createPlayers()
     {
         self.endEditing(true)
         for index in 0..<self.numberOfRows {
-            let cell = newPlayerTableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as? NewPlayerTableViewCell
+            let cell = newPlayerTableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 1)) as? NewPlayerTableViewCell
             if let textField = cell?.playerNameTextField where textField.text != "", let game = self.game, name = textField.text {
                 GameController.sharedController.addPlayerToGame(name, game: game)
             }
@@ -165,19 +165,37 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
 
 extension AddPlayerView: UITableViewDataSource, UITableViewDelegate {
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return 2
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.numberOfRows
+        switch section {
+        case 0:
+            return self.game?.players?.count ?? 0
+        default:
+            return self.numberOfRows
+        }
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("newPlayerCell", forIndexPath: indexPath) as? NewPlayerTableViewCell
-        cell?.playerNumberLabel.text = "\(indexPath.row + 1)"
-        cell?.delegate = self
-        cell?.playerNameTextField.becomeFirstResponder()
         
-        return cell ?? UITableViewCell()
+        if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCellWithIdentifier("playerNameCell", forIndexPath: indexPath)
+            if let player = self.game?.players?.allObjects[indexPath.row] as? Player {
+                
+                cell.textLabel?.text = player.name
+                cell.textLabel?.textColor = .whiteColor()
+            }
+            
+            return cell
+        } else {
+            
+            let cell = tableView.dequeueReusableCellWithIdentifier("newPlayerCell", forIndexPath: indexPath) as? NewPlayerTableViewCell
+            cell?.playerNumberLabel.text = "\(indexPath.row + 1)"
+            cell?.delegate = self
+            cell?.playerNameTextField.becomeFirstResponder()
+            
+            return cell ?? UITableViewCell()
+        }
     }
 }

@@ -189,7 +189,7 @@
         <!--Score View Controller-->
         <scene sceneID="EtN-FG-4Dc">
             <objects>
-                <viewController id="lgy-5j-Opk" customClass="ScoreViewController" customModule="ScoreKeeper" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ScoreViewController" id="lgy-5j-Opk" customClass="ScoreViewController" customModule="ScoreKeeper" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Jsf-gF-rVu"/>
                         <viewControllerLayoutGuide type="bottom" id="ZcK-jb-Ob7"/>

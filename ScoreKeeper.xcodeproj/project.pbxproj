@@ -30,6 +30,7 @@
 		DB461D911CE052320097DF84 /* PlayerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB461D901CE052320097DF84 /* PlayerCollectionViewCell.swift */; };
 		DB461D951CE052DF0097DF84 /* CustomImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB461D941CE052DF0097DF84 /* CustomImageView.swift */; };
 		DB6473B91CE53AAF00519360 /* PlayerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB6473B81CE53AAF00519360 /* PlayerTableViewCell.swift */; };
+		DB7647B51D13362700AE7088 /* PlayerNameCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB7647B41D13362700AE7088 /* PlayerNameCell.xib */; };
 		DB7CC8F01D022C4C00A0D3A7 /* WinnerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7CC8EF1D022C4C00A0D3A7 /* WinnerView.swift */; };
 		DB7CC8F21D022C6200A0D3A7 /* WinnerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7CC8F11D022C6200A0D3A7 /* WinnerImageView.swift */; };
 		DB7CC8F41D02490F00A0D3A7 /* PlayerAndScoreTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB7CC8F31D02490F00A0D3A7 /* PlayerAndScoreTableViewCell.swift */; };
@@ -79,6 +80,7 @@
 		DB461D901CE052320097DF84 /* PlayerCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerCollectionViewCell.swift; sourceTree = "<group>"; };
 		DB461D941CE052DF0097DF84 /* CustomImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomImageView.swift; sourceTree = "<group>"; };
 		DB6473B81CE53AAF00519360 /* PlayerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerTableViewCell.swift; sourceTree = "<group>"; };
+		DB7647B41D13362700AE7088 /* PlayerNameCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerNameCell.xib; sourceTree = "<group>"; };
 		DB7CC8EF1D022C4C00A0D3A7 /* WinnerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WinnerView.swift; sourceTree = "<group>"; };
 		DB7CC8F11D022C6200A0D3A7 /* WinnerImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WinnerImageView.swift; sourceTree = "<group>"; };
 		DB7CC8F31D02490F00A0D3A7 /* PlayerAndScoreTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerAndScoreTableViewCell.swift; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 				DB2BCEDC1D04A529002D574B /* AddPlayersView.xib */,
 				DB2BCEDE1D04A56C002D574B /* AddPlayerView.swift */,
 				DB2BCEE21D04C92D002D574B /* NewPlayerCell.xib */,
+				DB7647B41D13362700AE7088 /* PlayerNameCell.xib */,
 				DB2BCEE01D04BF79002D574B /* NewPlayerTableViewCell.swift */,
 			);
 			name = "Custom Xibs";
@@ -316,6 +319,7 @@
 				DB2BCEDD1D04A529002D574B /* AddPlayersView.xib in Resources */,
 				DB2BCEE31D04C92D002D574B /* NewPlayerCell.xib in Resources */,
 				DB461D801CE051750097DF84 /* Assets.xcassets in Resources */,
+				DB7647B51D13362700AE7088 /* PlayerNameCell.xib in Resources */,
 				DB461D7E1CE051750097DF84 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

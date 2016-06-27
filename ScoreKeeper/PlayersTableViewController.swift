@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, AddPlayerDelegate, DismissBlurDelegate {
+class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, AddPlayerDelegate, DismissBlurDelegate, UIViewControllerPreviewingDelegate{
     
     @IBOutlet weak var addPlayerButton: CustomNumberButton!
     @IBOutlet weak var scoreButtonsStackView: UIStackView!
@@ -27,6 +27,8 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        registerForPreviewingWithDelegate(self, sourceView: scoreViewButton)
+        
         isPlayersLabel = UILabel()
         self.view.addSubview(isPlayersLabel)
         isPlayersLabel.hidden = true
@@ -42,6 +44,24 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
         toggleScoreViewButtonEnabled()
         self.tableView.reloadData()
         self.view.setNeedsDisplay()
+    }
+    
+    func previewingContext(previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
+        if let scoreViewController = storyboard?.instantiateViewControllerWithIdentifier("ScoreViewController") as? ScoreViewController {
+        let buttonRect = self.scoreViewButton.frame
+        previewingContext.sourceRect = buttonRect
+        if let game = self.game {
+            scoreViewController.game = game
+        }
+            return scoreViewController
+        } else {
+            return nil
+        }
+    }
+    
+    func previewingContext(previewingContext: UIViewControllerPreviewing, commitViewController viewControllerToCommit: UIViewController) {
+        
+        showViewController(viewControllerToCommit, sender: self)
     }
     
     func toggleScoreViewButtonEnabled() {

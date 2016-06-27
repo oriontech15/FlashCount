@@ -57,13 +57,93 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ScoreKeeper/AddPlayerView.swift"
-            timestampString = "487278719.835167"
+            filePath = "ScoreKeeper/PlayersTableViewController.swift"
+            timestampString = "488243097.969342"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
-            landmarkName = "addTextFieldValue(_:created:)"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
+            landmarkName = "previewingContext(_:viewControllerForLocation:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScoreKeeper/PlayersTableViewController.swift"
+            timestampString = "488243215.385582"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "previewingContext(_:viewControllerForLocation:)"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScoreKeeper.PlayersTableViewController.previewingContext (__ObjC.UIViewControllerPreviewing, viewControllerForLocation : __C.CGPoint) -&gt; Swift.Optional&lt;__ObjC.UIViewController&gt;"
+                  moduleName = "ScoreKeeper"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Orion/Desktop/Files/Computer%20Science/XCode/Personal/ScoreKeeper/ScoreKeeper/PlayersTableViewController.swift"
+                  timestampString = "488243618.770431"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "688">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScoreKeeper.PlayersTableViewController.previewingContext (__ObjC.UIViewControllerPreviewing, viewControllerForLocation : __C.CGPoint) -&gt; Swift.Optional&lt;__ObjC.UIViewController&gt;"
+                  moduleName = "ScoreKeeper"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Orion/Desktop/Files/Computer%20Science/XCode/Personal/ScoreKeeper/ScoreKeeper/PlayersTableViewController.swift"
+                  timestampString = "488243618.770584"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "732">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScoreKeeper/PlayersTableViewController.swift"
+            timestampString = "488243617.700081"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "57"
+            endingLineNumber = "57"
+            landmarkName = "previewingContext(_:viewControllerForLocation:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScoreKeeper/PlayersTableViewController.swift"
+            timestampString = "488243249.059504"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "54"
+            endingLineNumber = "54"
+            landmarkName = "previewingContext(_:viewControllerForLocation:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
