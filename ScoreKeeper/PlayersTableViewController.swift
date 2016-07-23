@@ -8,7 +8,7 @@
 
 import UIKit
 
-class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, AddPlayerDelegate, DismissBlurDelegate, UIViewControllerPreviewingDelegate{
+class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppearanceDelegate, AddPlayerDelegate, DismissBlurDelegate /*UIViewControllerPreviewingDelegate */ {
     
     @IBOutlet weak var addPlayerButton: CustomNumberButton!
     @IBOutlet weak var scoreButtonsStackView: UIStackView!
@@ -18,8 +18,6 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
     @IBOutlet weak var toolbarView: UIView!
     @IBOutlet weak var toolbarSeperatorView: UIView!
     
-    var isPlayersLabel: UILabel!
-    
     var game: Game?
     
     var blurEffectView = UIVisualEffectView()
@@ -27,11 +25,7 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        registerForPreviewingWithDelegate(self, sourceView: scoreViewButton)
-        
-        isPlayersLabel = UILabel()
-        self.view.addSubview(isPlayersLabel)
-        isPlayersLabel.hidden = true
+        //registerForPreviewingWithDelegate(self, sourceView: scoreViewButton)
         
         AppearanceController.sharedController.navigationBarAppearanceDelegate = self
         
@@ -46,37 +40,16 @@ class PlayersTableViewController: UITableViewController, UpdateNavigationBarAppe
         self.view.setNeedsDisplay()
     }
     
-    func previewingContext(previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
-        if let scoreViewController = storyboard?.instantiateViewControllerWithIdentifier("ScoreViewController") as? ScoreViewController {
-        let buttonRect = self.scoreViewButton.frame
-        previewingContext.sourceRect = buttonRect
-        if let game = self.game {
-            scoreViewController.game = game
-        }
-            return scoreViewController
-        } else {
-            return nil
-        }
-    }
-    
-    func previewingContext(previewingContext: UIViewControllerPreviewing, commitViewController viewControllerToCommit: UIViewController) {
-        
-        showViewController(viewControllerToCommit, sender: self)
-    }
-    
     func toggleScoreViewButtonEnabled() {
         if let game = self.game {
             if game.players!.count == 0 {
-                isPlayersLabel.hidden = false
-                self.view.bringSubviewToFront(isPlayersLabel)
-                isPlayersLabel.frame = CGRectMake(self.view.frame.origin.x + 20, self.view.frame.origin.y + 20, self.view.frame.size.width - 40, 50)
-                isPlayersLabel.textAlignment = .Center
-                isPlayersLabel.textColor = .whiteColor()
-                isPlayersLabel.text = "Currently no players"
-                self.scoreButtonsStackView.hidden = true
+                self.gameTitleLabel.text = "Currently no players"
+                self.scoreViewButton.hidden = true
+                self.editScoresButton.hidden = true
             } else {
-                self.scoreButtonsStackView.hidden = false
-                isPlayersLabel.hidden = true
+                self.gameTitleLabel.text = game.name
+                self.scoreViewButton.hidden = false
+                self.editScoresButton.hidden = false
             }
         }
     }

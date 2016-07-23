@@ -14,10 +14,10 @@ import CoreData
 
 extension Game {
 
-    @NSManaged var date: NSDate?
-    @NSManaged var name: String?
-    @NSManaged var scoreType: NSNumber?
-    @NSManaged var finished: NSNumber?
+    @NSManaged var date: NSDate
+    @NSManaged var name: String
+    @NSManaged var scoreType: NSNumber
+    @NSManaged var finished: NSNumber
     @NSManaged var players: NSSet?
 
 }

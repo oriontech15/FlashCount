@@ -13,10 +13,12 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
     @IBOutlet weak var headerView: UIView!
     @IBOutlet weak var bucketBarButton: UIBarButtonItem!
     @IBOutlet weak var addGameBarButton: UIBarButtonItem!
+    @IBOutlet weak var gameFinishedToggle: UISegmentedControl!
     
     var blurEffectView = UIVisualEffectView()
-
+    
     var game: Game?
+    var finished: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +36,16 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
             bucketBarButton.image = UIImage(named: "RedPaintBucket")?.imageWithRenderingMode(.AlwaysOriginal)
         }
         AppearanceController.sharedController.loadTheme()
+    }
+    
+    @IBAction func gameFinishedSegue(segue: UIStoryboardSegue) {
+        self.tableView.reloadData()
+    }
+    
+    @IBAction func gameFinisedToggled(sender: UISegmentedControl) {
+        self.finished = Bool(sender.selectedSegmentIndex)
+        
+        self.tableView.reloadData()
     }
     
     @IBAction func changeThemeButtonTapped() {
@@ -89,12 +101,7 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
             view.delegate = self
             view.defaultFrame = frame
             view.layer.cornerRadius = 10
-//            view.layer.borderColor = UIColor.themeBlue().CGColor
-//            view.layer.borderWidth = 0.4
-//            view.layer.shadowColor = UIColor.themeBlue().CGColor
-//            view.layer.shadowOpacity = 1.0
-//            view.layer.shadowOffset = CGSizeZero
-//            view.layer.shadowRadius = 10
+            
             self.navigationController?.view.addSubview(blurEffectView)
             self.navigationController?.view.addSubview(view)
             
@@ -123,11 +130,20 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
     // MARK: - Table view data source
     
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        if GameController.sharedController.games.count > 0 {
-            return GameController.sharedController.games.count
+        if finished == false {
+            if GameController.sharedController.unfinishedGames.count > 0 {
+                return GameController.sharedController.unfinishedGames.count
+            } else {
+                return 1
+            }
         } else {
-            return 1
+            if GameController.sharedController.finishedGames.count > 0 {
+                return GameController.sharedController.finishedGames.count
+            } else {
+                return 1
+            }
         }
+        
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -136,62 +152,163 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        if GameController.sharedController.games.count > 0 {
-            let cell = tableView.dequeueReusableCellWithIdentifier("gamesCell", forIndexPath: indexPath) as? GameTableViewCell
-            let game = GameController.sharedController.games[indexPath.section]
-            if AppearanceController.sharedController.theme == .Blue {
-                cell?.backgroundColor = .themeBlue()
-                cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, textColor: .themeDarkestGray())
-                //cell?.contentView.layer.cornerRadius = 27.4
+        if finished == false {
+            if GameController.sharedController.unfinishedGames.count > 0 {
+                let cell = tableView.dequeueReusableCellWithIdentifier("unfinishedGamesCell", forIndexPath: indexPath) as? GameTableViewCell
+                
+                let game = GameController.sharedController.unfinishedGames[indexPath.section]
+                
+                var gameScoreTypeString = ""
+                if game.scoreType == 0 {
+                    gameScoreTypeString = "High Score"
+                } else {
+                    gameScoreTypeString = "Low Score"
+                }
+                
+                if AppearanceController.sharedController.theme == .Blue {
+                    cell?.backgroundColor = .themeBlue()
+                    
+                    cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, finished: false, scoreType: gameScoreTypeString, textColor: .themeDarkestGray())
+                    //cell?.contentView.layer.cornerRadius = 27.4
+                } else {
+                    cell?.backgroundColor = .themeRedLight()
+                    cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, finished: false, scoreType: gameScoreTypeString, textColor: .whiteColor())
+                    //cell?.contentView.layer.cornerRadius = 27.4
+                }
+                
+                return cell ?? UITableViewCell()
+                
             } else {
-                cell?.backgroundColor = .themeRedLight()
-                cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: game.players?.count ?? 0, textColor: .whiteColor())
-                //cell?.contentView.layer.cornerRadius = 27.4
+                let cell = tableView.dequeueReusableCellWithIdentifier("noGamesCell", forIndexPath: indexPath) as? NoDataTableViewCell
+                cell?.delegate = self
+                cell?.noDataLabel.text = "No unfinished games"
+                cell?.noDataLabel.textColor = .whiteColor()
+                if AppearanceController.sharedController.theme == .Blue {
+                    cell?.createGameButton.hidden = false
+                    cell?.createGameButton.backgroundColor = .themeBlue()
+                } else {
+                    cell?.createGameButton.hidden = false
+                    cell?.createGameButton.backgroundColor = .themeRedLight()
+                }
+                
+                return cell ?? UITableViewCell()
             }
-            
-            return cell ?? UITableViewCell()
-            
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("noGamesCell", forIndexPath: indexPath) as? NoDataTableViewCell
-            cell?.delegate = self
-            cell?.noDataLabel.text = "No games"
-            cell?.noDataLabel.textColor = .whiteColor()
-            if AppearanceController.sharedController.theme == .Blue {
-                cell?.createGameButton.backgroundColor = .themeBlue()
+            if GameController.sharedController.finishedGames.count > 0 {
+                let cell = tableView.dequeueReusableCellWithIdentifier("unfinishedGamesCell", forIndexPath: indexPath) as? GameTableViewCell
+                
+                let game = GameController.sharedController.finishedGames[indexPath.section]
+                if let players = game.players?.allObjects as? [Player] {
+                    var gameScoreTypeString = ""
+                    
+                    var sortedPlayers: [Player] = []
+                    if game.scoreType == 0 {
+                        gameScoreTypeString = "High Score"
+                        sortedPlayers = players.sort({ $0.score!.integerValue > $1.score!.integerValue })
+                    } else {
+                        gameScoreTypeString = "Low Score"
+                        sortedPlayers = players.sort({ $0.score!.integerValue < $1.score!.integerValue })
+                    }
+                    
+                    if let winner = sortedPlayers.first, _ = winner.score {
+                        if AppearanceController.sharedController.theme == .Blue {
+                            cell?.backgroundColor = .themeBlue()
+                            
+                            cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: players.count, finished: true, scoreType: gameScoreTypeString, textColor: .themeDarkestGray())
+                            //cell?.contentView.layer.cornerRadius = 27.4
+                        } else {
+                            cell?.backgroundColor = .themeRedLight()
+                            cell?.updateWith(game.name, date: NSDate.englishStringFromDate(game.date), playerCount: players.count, finished: true, scoreType: gameScoreTypeString, textColor: .whiteColor())
+                            //cell?.contentView.layer.cornerRadius = 27.4
+                        }
+                    }
+
+                    return cell ?? UITableViewCell()
+                
+                } else {
+                    let cell = tableView.dequeueReusableCellWithIdentifier("noGamesCell", forIndexPath: indexPath) as? NoDataTableViewCell
+                    cell?.delegate = self
+                    cell?.noDataLabel.text = "No finished games"
+                    cell?.noDataLabel.textColor = .whiteColor()
+                    if AppearanceController.sharedController.theme == .Blue {
+                        cell?.createGameButton.hidden = true
+                    } else {
+                        cell?.createGameButton.hidden = true
+                    }
+                    
+                    return cell ?? UITableViewCell()
+                }
             } else {
-                cell?.createGameButton.backgroundColor = .themeRedLight()
+                let cell = tableView.dequeueReusableCellWithIdentifier("noGamesCell", forIndexPath: indexPath) as? NoDataTableViewCell
+                cell?.delegate = self
+                cell?.noDataLabel.text = "No finished games"
+                cell?.noDataLabel.textColor = .whiteColor()
+                if AppearanceController.sharedController.theme == .Blue {
+                    cell?.createGameButton.hidden = true
+                } else {
+                    cell?.createGameButton.hidden = true
+                }
+                
+                return cell ?? UITableViewCell()
             }
-        
-            return cell ?? UITableViewCell()
         }
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if GameController.sharedController.games.count > 0 {
-            self.game = GameController.sharedController.games[indexPath.section]
-            self.performSegueWithIdentifier("toPlayerView", sender: nil)
+        
+        if finished == false {
+            if GameController.sharedController.unfinishedGames.count > 0 {
+                self.game = GameController.sharedController.unfinishedGames[indexPath.section]
+                self.performSegueWithIdentifier("toPlayerView", sender: nil)
+            }
+        } else {
+            if GameController.sharedController.finishedGames.count > 0 {
+                self.game = GameController.sharedController.finishedGames[indexPath.section]
+                self.performSegueWithIdentifier("toScoreView", sender: nil)
+            }
         }
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if GameController.sharedController.games.count > 0 {
-            return 55
+        if finished == false {
+            if GameController.sharedController.unfinishedGames.count > 0 {
+                return 55
+            } else {
+                return 150
+            }
         } else {
-            return 150
+            if GameController.sharedController.finishedGames.count > 0 {
+                return 55
+            } else {
+                return 150
+            }
         }
+        
     }
     
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            if indexPath.row == 0 {
-                let game = GameController.sharedController.games[indexPath.section]
-                GameController.sharedController.deleteGame(game)
-                tableView.reloadData()
+            if finished == false {
+                if indexPath.row == 0 {
+                    let game = GameController.sharedController.unfinishedGames[indexPath.section]
+                    GameController.sharedController.deleteGame(game)
+                    tableView.reloadData()
+                } else {
+                    let game = GameController.sharedController.unfinishedGames[indexPath.section]
+                    GameController.sharedController.deleteGame(game)
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                }
             } else {
-                let game = GameController.sharedController.games[indexPath.section]
-                GameController.sharedController.deleteGame(game)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                if indexPath.row == 0 {
+                    let game = GameController.sharedController.finishedGames[indexPath.section]
+                    GameController.sharedController.deleteGame(game)
+                    tableView.reloadData()
+                } else {
+                    let game = GameController.sharedController.finishedGames[indexPath.section]
+                    GameController.sharedController.deleteGame(game)
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                }
             }
         }
     }
@@ -228,6 +345,10 @@ class GamesTableViewController: UITableViewController, UpdateNavigationBarAppear
         if segue.identifier == "toPlayerView" {
             if let playerVC = segue.destinationViewController as? PlayersTableViewController {
                 playerVC.game = self.game
+            }
+        } else if segue.identifier == "toScoreView" {
+            if let scoreVC = segue.destinationViewController as? ScoreViewController {
+                scoreVC.game = self.game
             }
         }
     }

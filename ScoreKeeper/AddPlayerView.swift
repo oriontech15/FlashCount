@@ -38,7 +38,7 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
         self.newPlayerTableView.registerNib(UINib(nibName: "NewPlayerCell", bundle: nil), forCellReuseIdentifier: "newPlayerCell")
         
         self.newPlayerTableView.registerNib(UINib(nibName: "PlayerNameCell", bundle: nil), forCellReuseIdentifier: "playerNameCell")
-
+        
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         self.addGestureRecognizer(tap)
     }
@@ -60,44 +60,98 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
         }
     }
     
-    func addTextFieldValue(textField: UITextField, created: Bool) {
-        self.playerNames.append(textField.text!)
-        print(self.playerNames)
+    func addTextFieldValue(textField: UITextField, created: Bool, cell: NewPlayerTableViewCell) {
+        if let indexPath = newPlayerTableView.indexPathForCell(cell), newPlayerCell = newPlayerTableView.cellForRowAtIndexPath(indexPath) as? NewPlayerTableViewCell {
+            if playerNames.count == newPlayerTableView.numberOfRowsInSection(0) {
+                if playerNames[indexPath.row] != newPlayerCell.playerNameTextField.text {
+                    if textField.text == ""
+                    {
+                        let randomFirstName = RandomNames.sharedNames.firstNames[Int(arc4random_uniform(UInt32(RandomNames.sharedNames.firstNames.count)))]
+                        let randomLastName = RandomNames.sharedNames.lastNames[Int(arc4random_uniform(UInt32(RandomNames.sharedNames.lastNames.count)))]
+                        print(RandomNames.sharedNames.firstNames.count)
+                        print(RandomNames.sharedNames.lastNames.count)
+                        self.playerNames.append(randomFirstName + " " + randomLastName)
+                        textField.text = self.playerNames[indexPath.row]
+                        print(self.playerNames)
+                        
+                    } else {
+                        self.playerNames.removeAtIndex(indexPath.row)
+                        self.playerNames.insert(textField.text!, atIndex: indexPath.row)
+                        print(self.playerNames)
+                    }
+                } else {
+                    print("They are equal")
+                }
+            } else {
+                if textField.text == ""
+                {
+                    let randomFirstName = RandomNames.sharedNames.firstNames[Int(arc4random_uniform(UInt32(RandomNames.sharedNames.firstNames.count)))]
+                    let randomLastName = RandomNames.sharedNames.lastNames[Int(arc4random_uniform(UInt32(RandomNames.sharedNames.lastNames.count)))]
+                    print(RandomNames.sharedNames.firstNames.count)
+                    print(RandomNames.sharedNames.lastNames.count)
+                    self.playerNames.append(randomFirstName + " " + randomLastName)
+                    textField.text = self.playerNames[indexPath.row]
+                    print(self.playerNames)
+                    
+                } else {
+                    let text = textField.text!
+                    self.playerNames.append(text)
+                    print(self.playerNames)
+                }
+            }
+        }
     }
     
     @IBAction func addButtonTapped() {
         createPlayers()
     }
     
-    @IBAction func addPlayerButtonTapped(sender: AnyObject) {
+    @IBAction func addPlayerButtonTapped(sender: UIButton) {
         
-        numberOfRows = numberOfRows + 1
-        let newIndexPath = NSIndexPath(forItem: numberOfRows - 1, inSection: 1)
-        self.newPlayerTableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
-
-        let indexPath = NSIndexPath(forRow: numberOfRows - 1, inSection: 1)
-        self.newPlayerTableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
-//            let offset = CGPointMake(0, newPlayerTableView.contentSize.height - newPlayerTableView.frame.size.height + 2)
-//            self.newPlayerTableView.setContentOffset(offset, animated: true)
+        if numberOfRows != 5 {
+            numberOfRows = numberOfRows + 1
+            let newIndexPath = NSIndexPath(forItem: numberOfRows - 1, inSection: 0)
+            self.newPlayerTableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+            
+            let indexPath = NSIndexPath(forRow: numberOfRows - 1, inSection: 0)
+            self.newPlayerTableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+            
+            if numberOfRows == 5 {
+                sender.enabled = false
+                sender.backgroundColor = .lightGrayColor()
+            }
+        }
     }
     
     func createPlayers()
     {
         self.endEditing(true)
-        for index in 0..<self.numberOfRows {
-            let cell = newPlayerTableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 1)) as? NewPlayerTableViewCell
-            if let textField = cell?.playerNameTextField where textField.text != "", let game = self.game, name = textField.text {
-                GameController.sharedController.addPlayerToGame(name, game: game)
+        if self.playerNames.count > 0 {
+            for index in 0..<self.numberOfRows {
+                let indexPath = NSIndexPath(forRow: index, inSection: 0)
+                if let newPlayerCell = newPlayerTableView.cellForRowAtIndexPath(indexPath) as? NewPlayerTableViewCell, game = self.game {
+                    let textField = newPlayerCell.playerNameTextField
+                    if textField.text != self.playerNames[index] {
+                        self.playerNames.removeAtIndex(indexPath.row)
+                        self.playerNames.insert(textField.text!, atIndex: indexPath.row)
+                        print(playerNames)
+                        let name = self.playerNames[index]
+                        GameController.sharedController.addPlayerToGame(name, game: game)
+                    } else {
+                        print("They are equal")
+                        let name = self.playerNames[index]
+                        GameController.sharedController.addPlayerToGame(name, game: game)
+                    }
+                }
             }
         }
         removeView(false)
     }
     
-    
-    
     func dismissKeyboard()
     {
         moveView(0, defaultFrame: true)
+        self.endEditing(true)
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
@@ -165,12 +219,12 @@ class AddPlayerView: UIView, UITextFieldDelegate, TextFieldValueUpdatedDelegate 
 
 extension AddPlayerView: UITableViewDataSource, UITableViewDelegate {
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 2
+        return 1
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 0:
+        case 1:
             return self.game?.players?.count ?? 0
         default:
             return self.numberOfRows
@@ -179,7 +233,7 @@ extension AddPlayerView: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        if indexPath.section == 0 {
+        if indexPath.section == 1 {
             let cell = tableView.dequeueReusableCellWithIdentifier("playerNameCell", forIndexPath: indexPath)
             if let player = self.game?.players?.allObjects[indexPath.row] as? Player {
                 

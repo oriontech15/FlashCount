@@ -13,9 +13,21 @@ class GameController {
     
     static let sharedController = GameController()
     
-    var games: [Game] {
+    var unfinishedGames: [Game] {
         
         let request = NSFetchRequest(entityName: "Game")
+        let predicate = NSPredicate(format: "finished == 0")
+        request.predicate = predicate
+        
+        let moc = Stack.sharedStack.managedObjectContext
+        
+        return (try? moc.executeFetchRequest(request)) as? [Game] ?? []
+    }
+    
+    var finishedGames: [Game] {
+        let request = NSFetchRequest(entityName: "Game")
+        let predicate = NSPredicate(format: "finished == 1")
+        request.predicate = predicate
         
         let moc = Stack.sharedStack.managedObjectContext
         
@@ -23,7 +35,18 @@ class GameController {
     }
     
     init() {
-        _ = games
+        _ = unfinishedGames
+        _ = finishedGames
+    }
+    
+    func markGameAsFinished(game: Game) {
+        game.finished = true
+        save()
+    }
+    
+    func markGameAsUnfinished(game: Game) {
+        game.finished = false
+        save()
     }
     
     func save() {
@@ -35,8 +58,8 @@ class GameController {
         }
     }
     
-    func createGame(name: String) {
-        let _ = Game(name: name)
+    func createGame(name: String, scoreType: NSNumber) {
+        let _ = Game(name: name, scoreType: scoreType)
         save()
     }
     

@@ -70,7 +70,7 @@ class CreateGameView: UIView, UITextFieldDelegate, UITextViewDelegate
     func createGame()
     {
         if let text = gameTitleTextField.text {
-            GameController.sharedController.createGame(text)
+            GameController.sharedController.createGame(text, scoreType: lowHighSegmentedController.selectedSegmentIndex)
             removeView(false)
         }
     }

@@ -13,6 +13,7 @@ class GameTableViewCell: UITableViewCell {
     @IBOutlet weak var gameNameLabel: UILabel!
     @IBOutlet weak var gameDateLabel: UILabel!
     @IBOutlet weak var gamePlayersLabel: UILabel!
+    @IBOutlet weak var scoreTypeLabel: UILabel!
     
     var lineColor: UIColor = .themeDarkestGray()
     
@@ -36,16 +37,24 @@ class GameTableViewCell: UITableViewCell {
         // Initialization code
     }
     
-    func updateWith(name: String, date: String, playerCount: Int, textColor: UIColor) {
+    func updateWith(name: String, date: String, playerCount: Int, finished: Bool, scoreType: String, textColor: UIColor) {
         self.gamePlayersLabel.layer.cornerRadius = self.gamePlayersLabel.frame.height / 2
-        self.gamePlayersLabel.layer.masksToBounds = true 
-        self.gameNameLabel.text = name
+        self.gamePlayersLabel.layer.masksToBounds = true
+        
+        if finished {
+            self.gameNameLabel.text = "\(name) (Finished)"
+        } else {
+            self.gameNameLabel.text = name
+        }
+        
         self.gameDateLabel.text = date
         if playerCount > 1 || playerCount == 0 {
             self.gamePlayersLabel.text = "\(playerCount) Players"
         } else if playerCount == 1 {
             self.gamePlayersLabel.text = "\(playerCount) Player"
         }
+        
+        self.scoreTypeLabel.text = scoreType
         
         if AppearanceController.sharedController.theme == .Blue {
             self.gamePlayersLabel.textColor = .themeBlue()

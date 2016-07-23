@@ -9,7 +9,8 @@
 import UIKit
 
 protocol TextFieldValueUpdatedDelegate {
-    func addTextFieldValue(textField: UITextField, created: Bool)
+    func addTextFieldValue(textField: UITextField, created: Bool, cell: NewPlayerTableViewCell)
+//    func checkNameInTextField(textField: UITextField, created: Bool, cell: NewPlayerTableViewCell)
 }
 
 class NewPlayerTableViewCell: UITableViewCell, UITextFieldDelegate {
@@ -28,10 +29,15 @@ class NewPlayerTableViewCell: UITableViewCell, UITextFieldDelegate {
         playerNameTextField.autocorrectionType = .No
         playerNameTextField.autocapitalizationType = .Words
     }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
 
     func textFieldDidEndEditing(textField: UITextField) {
         
-        self.delegate?.addTextFieldValue(textField, created: created)
+        self.delegate?.addTextFieldValue(textField, created: created, cell: self)
         self.created = true
     }
 }
